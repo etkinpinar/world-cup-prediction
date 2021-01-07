@@ -1,26 +1,19 @@
 import numpy as np
 from sklearn.utils import shuffle
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import *
+from math import sqrt
 
-from sklearn.utils import shuffle
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.svm import SVC
-
-class SVM:
-    def __init__(self, team_name, championships):
+class KNN:
+    def __init__(self, team_name, championships, num_neighbors):
         self.team_name = team_name
         self.championships = championships
+        self.num_neighbours = num_neighbors
         self.X = None
-        self.y = None
-
-    def train_test_split(self, teamid_matches, dropped_matches) -> object:
+    def train_set_process(self, teamid_matches) -> object:
         X = teamid_matches.loc[:,
-            ['Home Team Name', 'Away Team Name', 'Home Team Championship', 'Away Team Championship']]
+            ['Home Team Name', 'Away Team Name', 'Home Team Championship', 'Away Team Championship', 'Winner']]
         X = np.array(X).astype('float64')
 
-        # exchange 'home team name' with 'away team name', 'home team championship' with 'away team championship', and replace the result
         _X = X.copy()
 
         _X[:, 0] = X[:, 1]
@@ -28,43 +21,42 @@ class SVM:
         _X[:, 2] = X[:, 3]
         _X[:, 3] = X[:, 2]
 
-        y = dropped_matches.loc[:, ['Winner']]
-        y = np.array(y).astype('float64')
-        y = np.reshape(y, (1, 850))
-
-        y = y[0]
-
-        _y = y.copy()
-
-        for i in range(len(_y)):
-            if _y[i] == 1:
-                _y[i] = 2
-            elif _y[i] == 2:
-                _y[i] = 1
+        for i in range(len(_X)):
+            if _X[i][-1] == 1:
+                _X[i][-1] = 2
+            elif _X[i][-1] == 2:
+                _X[i][-1] = 1
 
         X = np.concatenate((X, _X), axis=0)
-
-        y = np.concatenate((y, _y))
-
         # shuffle
-        self.X, self.y = shuffle(X, y)
-        # split test, train
-        return train_test_split(X, y, test_size=0.2)
+        self.X = shuffle(X)
+        return self.X
 
+    def euclidean_distance(self, row1, row2):
+        distance = 0.0
+        row1 = row1.flatten()
+        for i in range(len(row2) - 1):
+            distance += (row1[i] - row2[i]) ** 2
+        return sqrt(distance)
 
-    def fit(self, X, y, x_train, x_test, y_train, y_test):
-        param_grid = {'C': [1e3],
-                      'gamma': [0.0001]}
-        self.svm_model = SVC(kernel='rbf', class_weight='balanced', probability=True)
-        self.svm_model.fit(X, y)
+    def get_neighbors(self, train, test_row):
+        distances = list()
+        for train_row in train:
+            dist = self.euclidean_distance(test_row, train_row)
+            distances.append((train_row, dist))
+        distances.sort(key=lambda tup: tup[1])
+        neighbors = list()
+        for i in range(self.num_neighbours):
+            neighbors.append(distances[i][0])
+        return neighbors
 
-        print("Predicting on the test set")
-        # t0 = time()
-        y_pred = self.svm_model.predict(x_test)
-        # print("done in %0.3fs" % (time() - t0))
-        print(self.svm_model.score(x_test, y_test))
-        print(classification_report(y_test, y_pred))
-        print(confusion_matrix(y_test, y_pred, labels=range(3)))
+    def predict_classification(self, test_row):
+        neighbors = self.get_neighbors(self.X, test_row)
+        output_values = [row[-1] for row in neighbors]
+        win_prob = output_values.count(1) / self.num_neighbours
+        lose_prob = output_values.count(2) / self.num_neighbours
+        draw_prob = output_values.count(0) / self.num_neighbours
+        return draw_prob, win_prob, lose_prob
 
     def prediction(self, team1, team2):
         id1 = self.team_name[team1]
@@ -73,8 +65,21 @@ class SVM:
         championship2 = self.championships.get(team2) if self.championships.get(team2) != None else 0
         x = np.array([id1, id2, championship1, championship2]).astype('int')
         x = np.reshape(x, (1, -1))
-        _y = self.svm_model.predict_proba(x)[0]
+        draw_prob, win_prob, lose_prob = self.predict_classification(x)
         text = (
                 'Chance for ' + team1 + ' to win ' + team2 + ' is {}<br>\nChance for ' + team2 + ' to win ' + team1 + ' is {}<br>\nChance for ' + team1 + ' and ' + team2 + ' draw is {}').format(
-            _y[1] * 100, _y[2] * 100, _y[0] * 100)
-        return _y[0], text
+            win_prob * 100, lose_prob * 100, draw_prob * 100)
+        return draw_prob, text
+
+    def accuracy(self):
+        y_true = self.X[:, 4]
+        y_pred = list()
+        for row in self.X:
+            probs = self.predict_classification(row[:4])
+            max_index = probs.index(max(probs))
+            y_pred.append(max_index)
+        acc = accuracy_score(y_true, y_pred)
+        recall = recall_score(y_true, y_pred, average="macro")
+        precision = precision_score(y_true, y_pred, average="macro")
+        confusion_mtx = confusion_matrix(y_true, y_pred)
+        return acc, recall,  precision, confusion_mtx

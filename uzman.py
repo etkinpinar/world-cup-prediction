@@ -1,6 +1,6 @@
 from interface.interface import run
 from preprocessing import *
-from test_and_train import SVM
+from test_and_train import KNN
 
 
 if __name__ == "__main__":
@@ -16,15 +16,21 @@ if __name__ == "__main__":
     dropped_matches = preprocessing.find_winners()
     teamid_matches = preprocessing.replace_team_names_by_id()
 
-    svm = SVM(team_name, championships)
-    X_train, X_test, y_train, y_test = svm.train_test_split(teamid_matches, dropped_matches)
-    print(X_train, y_train)
-    svm.fit(svm.X, svm.y, X_train, X_test, y_train, y_test)
+    knn = KNN(team_name, championships, 17)
+    X = knn.train_set_process(teamid_matches)
+    print(X)
 
     # predict match between France and Uruguay
     print(list(team_name.keys()))
-    run(list(team_name.keys()), svm)
+    #run(list(team_name.keys()), knn)
 
-    prob1, text1 = svm.prediction('France', 'Uruguay')
+    prob1, text1 = knn.prediction('Sweden', 'Uruguay')
     print(text1)
+    prob1, text1 = knn.prediction('France', 'Romania')
+    print(text1)
+    acc, recall, precision, conf_mtx = knn.accuracy()
+    print("Accuracy: ", acc)
+    print("Recall: ", recall)
+    print("Precision: ", precision)
+    print("Confusion Matrix:\n", conf_mtx)
 
