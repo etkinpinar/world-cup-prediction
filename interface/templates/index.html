@@ -10,7 +10,7 @@
     <div class="body-wrapper" style="text-align: center; padding-top: 50px;">
     <h1 style="font-size: 50px;">Paul The Octopus</h1>
     <img src="static/paul.jpg" alt="Paul The Octopus" style="width: 500px; height: 300px;">
-        <form class="form-inline" method="POST" style="margin-bottom: 15vh;" action="{{ url_for('index') }}">
+        <form class="form-inline" method="POST" action="{{ url_for('index') }}">
           <div class="form-group">
             <div class="input-group">
                 <span class="input-group-addon">Please select</span>
@@ -31,9 +31,11 @@
           </div>
         <button type="submit" class="send-wrapper" style="height: 300px; width:300px; height: 50px; margin-top: 50px;">Bring The Octopus</button>
         </form>
-    {% if result %}
-        {{ result }}
-    {% endif %}
+    <div style="font-size: 50px;">
+        {% if result %}
+            {{ result }}
+        {% endif %}
+    </div>
     </div>
 
 </body>
