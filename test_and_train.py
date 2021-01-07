@@ -75,6 +75,6 @@ class SVM:
         x = np.reshape(x, (1, -1))
         _y = self.svm_model.predict_proba(x)[0]
         text = (
-                'Chance for ' + team1 + ' to win ' + team2 + ' is {}\nChance for ' + team2 + ' to win ' + team1 + ' is {}\nChance for ' + team1 + ' and ' + team2 + ' draw is {}').format(
+                'Chance for ' + team1 + ' to win ' + team2 + ' is {}<br>\nChance for ' + team2 + ' to win ' + team1 + ' is {}<br>\nChance for ' + team1 + ' and ' + team2 + ' draw is {}').format(
             _y[1] * 100, _y[2] * 100, _y[0] * 100)
         return _y[0], text
