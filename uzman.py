@@ -1,3 +1,4 @@
+from interface.interface import run
 from preprocessing import *
 from test_and_train import SVM
 
@@ -21,6 +22,9 @@ if __name__ == "__main__":
     svm.fit(svm.X, svm.y, X_train, X_test, y_train, y_test)
 
     # predict match between France and Uruguay
+    print(list(team_name.keys()))
+    run(list(team_name.keys()), svm)
+
     prob1, text1 = svm.prediction('France', 'Uruguay')
     print(text1)
 
