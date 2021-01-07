@@ -12,7 +12,6 @@ class Preprocessing:
         self.matches = matches.dropna()
         self.players = players.dropna()
         self.cups = cups.dropna()
-        matches.head()
 
     @staticmethod
     def replace_name(df):
@@ -81,7 +80,6 @@ class Preprocessing:
             return df
 
         self.dropped_matches = self.dropped_matches.apply(count_championship, axis='columns')
-        print(self.dropped_matches)
         self.dropped_matches['Winner'] = '-'
 
     def find_winners(self):
@@ -94,19 +92,16 @@ class Preprocessing:
                 df['Winner'] = 2
             return df
         self.dropped_matches = self.dropped_matches.apply(find_winner, axis='columns')
-        print(self.dropped_matches)
         return self.dropped_matches
 
 
     def replace_team_name_by_id(self, df):
         df['Home Team Name'] = self.team_name[df['Home Team Name']]
         df['Away Team Name'] = self.team_name[df['Away Team Name']]
-        # df['Winner'] = team_name[df['Winner']]
         return df
 
     def replace_team_names_by_id(self):
         self.teamid_matches = self.dropped_matches.apply(self.replace_team_name_by_id, axis='columns')
-        print(self.teamid_matches)
 
         teamid_matches = self.teamid_matches.drop(['Year', 'Home Team Goals', 'Away Team Goals'], 1)
         return teamid_matches

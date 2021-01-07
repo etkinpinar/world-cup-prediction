@@ -67,7 +67,7 @@ class KNN:
         x = np.reshape(x, (1, -1))
         draw_prob, win_prob, lose_prob = self.predict_classification(x)
         text = (
-                'Chance for ' + team1 + ' to win ' + team2 + ' is {}<br>\nChance for ' + team2 + ' to win ' + team1 + ' is {}<br>\nChance for ' + team1 + ' and ' + team2 + ' draw is {}').format(
+                'Chance for ' + team1 + ' to win ' + team2 + ' is {}\nChance for ' + team2 + ' to win ' + team1 + ' is {}\nChance for ' + team1 + ' and ' + team2 + ' draw is {}').format(
             win_prob * 100, lose_prob * 100, draw_prob * 100)
         return draw_prob, text
 
@@ -81,5 +81,5 @@ class KNN:
         acc = accuracy_score(y_true, y_pred)
         recall = recall_score(y_true, y_pred, average="macro")
         precision = precision_score(y_true, y_pred, average="macro")
-        confusion_mtx = confusion_matrix(y_true, y_pred)
+        confusion_mtx = confusion_matrix(y_true, y_pred, labels=[0,1,2])
         return acc, recall,  precision, confusion_mtx

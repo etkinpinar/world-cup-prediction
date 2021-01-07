@@ -1,6 +1,7 @@
 from interface.interface import run
 from preprocessing import *
 from test_and_train import KNN
+from sklearn.metrics import ConfusionMatrixDisplay, PrecisionRecallDisplay
 
 
 if __name__ == "__main__":
@@ -16,18 +17,32 @@ if __name__ == "__main__":
     dropped_matches = preprocessing.find_winners()
     teamid_matches = preprocessing.replace_team_names_by_id()
 
-    knn = KNN(team_name, championships, 17)
+    knn = KNN(team_name, championships, 31)
     X = knn.train_set_process(teamid_matches)
-    print(X)
 
     # predict match between France and Uruguay
     print(list(team_name.keys()))
-    #run(list(team_name.keys()), knn)
+    run(list(team_name.keys()), knn)
 
     prob1, text1 = knn.prediction('Sweden', 'Uruguay')
     print(text1)
-    prob1, text1 = knn.prediction('France', 'Romania')
+    print()
+    prob1, text1 = knn.prediction('France', 'Brazil')
     print(text1)
+    print()
+    prob1, text1 = knn.prediction('Serbia', 'Romania')
+    print(text1)
+    print()
+    prob1, text1 = knn.prediction('Germany', 'Spain')
+    print(text1)
+    print()
+    prob1, text1 = knn.prediction('Portugal', 'Argentina')
+    print(text1)
+    print()
+    prob1, text1 = knn.prediction('Russia', 'Greece')
+    print(text1)
+    print()
+
     acc, recall, precision, conf_mtx = knn.accuracy()
     print("Accuracy: ", acc)
     print("Recall: ", recall)
